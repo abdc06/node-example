@@ -20,22 +20,20 @@ app.get('/api/v1/students', (req, res)=>{
 });
 
 app.get('/api/v1/students/:id', (req, res) => {
-    const student = students.find(s => s.id === parseInt(req.params.id))  
-    if(!student) res.status(404).send('The student with the given ID was not found');
+	const index = findIndex(req.params.id);
+
+	if (index < 0) {
+		return res.status(404).send('The student with the given ID was not found');
+	}
+
     res.send(student);
 });
 
 app.post('/api/v1/students', (req, res) => {
-	const schema = Joi.object({
-		name: Joi.string().min(2).max(30).required(),
-		age: Joi.number().integer()
-	});
-
-	const { error } = schema.validate(req.body);
+	const error = validateStudent(req.body);
 
 	if (error) {
-		res.status(400).send(error.details[0]?.message);
-		return;
+		return res.status(400).send(error.details[0]?.message);
 	}
 
 	const lastElem = [...students].pop();
@@ -50,22 +48,16 @@ app.post('/api/v1/students', (req, res) => {
 });
 
 app.put('/api/v1/students/:id', (req, res) => {
-	const schema = Joi.object({
-		name: Joi.string().min(2).max(30).required(),
-		age: Joi.number().integer().required()
-	});
-
-	const { error } = schema.validate(req.body);
+	const error = validateStudent(req.body);
 
 	if (error) {
-		res.status(400).send(error.details[0]?.message);
+		return res.status(400).send(error.details[0]?.message);
 	}
-	console.log(req.params)
-	const index = students.findIndex(s => s.id === parseInt(req.params.id));
-	console.log(index)
+
+	const index = findIndex(req.params.id);
 
 	if (index < 0) {
-		res.status(404).send('The student with the given ID was not found');
+		return res.status(404).send('The student with the given ID was not found');
 	}
 
     const student = {
@@ -78,6 +70,33 @@ app.put('/api/v1/students/:id', (req, res) => {
     res.send(student);
 });
 
+app.delete('/api/v1/students/:id', (req, res) => {
+    const index = findIndex(req.params.id);
+
+	if (index < 0) {
+		return res.status(404).send('The student with the given ID was not found');
+	}
+
+	const student = students.splice(index, 1).pop();
+
+    res.send(student);
+});
+
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);
 })
+
+function findIndex(id) {
+	return students.findIndex(s => s.id === parseInt(id));
+}
+
+function validateStudent(student){
+    const schema = Joi.object({
+		name: Joi.string().min(2).max(30).required(),
+		age: Joi.number().integer().required()
+	});
+
+	const { error } = schema.validate(student);
+
+	return error;
+}
