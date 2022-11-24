@@ -20,7 +20,7 @@ app.get('/api/v1/students', (req, res)=>{
 });
 
 app.get('/api/v1/students/:id', (req, res) => {
-    const student = students.find(c => c.id === parseInt(req.params.id))  
+    const student = students.find(s => s.id === parseInt(req.params.id))  
     if(!student) res.status(404).send('The student with the given ID was not found');
     res.send(student);
 });
@@ -46,6 +46,35 @@ app.post('/api/v1/students', (req, res) => {
 		age: req.body.age
     };
     students.push(student);
+    res.send(student);
+});
+
+app.put('/api/v1/students/:id', (req, res) => {
+	const schema = Joi.object({
+		name: Joi.string().min(2).max(30).required(),
+		age: Joi.number().integer().required()
+	});
+
+	const { error } = schema.validate(req.body);
+
+	if (error) {
+		res.status(400).send(error.details[0]?.message);
+	}
+	console.log(req.params)
+	const index = students.findIndex(s => s.id === parseInt(req.params.id));
+	console.log(index)
+
+	if (index < 0) {
+		res.status(404).send('The student with the given ID was not found');
+	}
+
+    const student = {
+        id: req.params.id,
+        name: req.body.name,
+		age: req.body.age
+    };
+
+	students[index] = student;
     res.send(student);
 });
 
