@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const express = require('express')
 const app = express()
 const port = 3000;
@@ -25,7 +26,18 @@ app.get('/api/v1/students/:id', (req, res) => {
 });
 
 app.post('/api/v1/students', (req, res) => {
-	const lastElem = students.splice(-1).pop();
+	const schema = Joi.object({
+		name: Joi.string().min(2).max(30).required(),
+		age: Joi.number().integer()
+	});
+
+	const { error } = schema.validate(req.body);
+
+	if (error) {
+		res.status(400).send(error);
+	}
+
+	const lastElem = [...students].pop();
 
     const student = {
         id: lastElem?.id + 1 || 1,
