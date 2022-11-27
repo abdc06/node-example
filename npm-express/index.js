@@ -1,9 +1,10 @@
 const Joi = require('joi');
+const cors = require('cors')
 const express = require('express')
 const app = express()
 const port = 3000;
 
-app.use(express.json());
+app.use(express.json(), cors());
 
 const students = [
 	{ id: 1, name: '김태호', age: 26 },
@@ -25,6 +26,8 @@ app.get('/api/v1/students/:id', (req, res) => {
 	if (index < 0) {
 		return res.status(404).send('The student with the given ID was not found');
 	}
+
+	const student = students[index];
 
     res.send(student);
 });
