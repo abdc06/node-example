@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>SimpleAPI</h1>
+  <main id="content"></main>
+  <ul>
+    <li>
+      <button onclick="getStudents();">getStudents</button>
+    </li>
+    <li>
+      <input type="text" name="studentId">
+      <button onclick="getStudent(`${this.previousElementSibling.value}`);">getStudent</button>
+    </li>
+  </ul>
+  <script>
+    const content = document.querySelector('#content');
+
+    function getStudents() {
+      contentClear();
+      fetch('http://localhost:3000/api/v1/students')
+        .then((response) => response.json())
+        .then((data) => {
+          const ul = document.createElement('ul');
+          data.forEach(element => {
+            let li = document.createElement('li');
+            li.innerHTML = `id: ${element.id}, name: ${element.name}`;
+            ul.appendChild(li);
+          });
+          content.appendChild(ul);
+        });
+    }
+
+    function getStudent(id) {
+      contentClear();
+      fetch(`http://localhost:3000/api/v1/students/${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const span = document.createElement('span');
+          span.innerHTML = `id: ${data.id}, name: ${data.name}`;
+          content.appendChild(span);
+        });
+    }
+
+    function contentClear() {
+      while (content.firstChild) {
+        content.removeChild(content.firstChild);
+      }      
+    }
+  </script>
+</body>
+</html>
